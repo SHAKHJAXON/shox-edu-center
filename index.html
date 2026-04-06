@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZiyoEdu | O'quv Markazi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+    <nav class="bg-white shadow-md p-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600"><i class="fas fa-graduation-cap"></i> ZiyoEdu</h1>
+            <div class="space-x-6 hidden md:block">
+                <a href="#courses" class="text-gray-600 hover:text-blue-600 font-medium">Kurslar</a>
+                <a href="#reg" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">A'zo bo'lish</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-16 px-4 text-center bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+        <h2 class="text-4xl md:text-6xl font-extrabold mb-4">Kelajakni biz bilan quring</h2>
+        <p class="text-xl opacity-90 mb-8">Zamonaviy kurslar va tajribali o'qituvchilar</p>
+        <a href="#courses" class="bg-white text-blue-600 px-8 py-3 rounded-full font-bold shadow-xl hover:scale-105 transition transform inline-block">Boshlash</a>
+    </header>
+
+    <section id="courses" class="max-w-6xl mx-auto py-20 px-4">
+        <h3 class="text-3xl font-bold text-center mb-12">Bizning kurslarimiz</h3>
+        <div id="course-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            </div>
+    </section>
+
+    <section id="reg" class="bg-white py-20">
+        <div class="max-w-md mx-auto px-4">
+            <div class="bg-gray-50 p-8 rounded-3xl shadow-lg border border-gray-100">
+                <h3 class="text-2xl font-bold text-center mb-6">Bepul darsga yoziling</h3>
+                <form id="regForm" class="space-y-4">
+                    <input type="text" id="name" placeholder="Ismingiz" required class="w-full p-3 rounded-xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="tel" id="phone" placeholder="Telefon raqamingiz" required class="w-full p-3 rounded-xl border border-gray-300 outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="courseSelect" required class="w-full p-3 rounded-xl border border-gray-300 bg-white">
+                        <option value="" disabled selected>Kursni tanlang</option>
+                    </select>
+                    <button type="submit" id="btn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">Yuborish</button>
+                </form>
+                <div id="msg" class="hidden mt-4 text-center p-4 bg-green-100 text-green-700 rounded-xl">
+                    Siz muvaffaqiyatli ro'yxatdan o'tdingiz!
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API = "http://127.0.0.1:8000";
+
+        // Kurslarni yuklash
+        async function load() {
+            try {
+                const res = await fetch(`${API}/courses`);
+                const data = await res.json();
+                const list = document.getElementById('course-list');
+                const select = document.getElementById('courseSelect');
+
+                data.forEach(c => {
+                    list.innerHTML += `
+                        <div class="bg-white p-6 rounded-2xl shadow-md border hover:shadow-xl transition">
+                            <div class="text-4xl mb-4">${c.icon}</div>
+                            <h4 class="text-xl font-bold mb-2">${c.name}</h4>
+                            <p class="text-gray-500 text-sm mb-4">${c.duration}</p>
+                            <p class="text-blue-600 font-bold text-lg">${c.price}</p>
+                        </div>
+                    `;
+                    select.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                });
+            } catch (err) {
+                console.error("API bilan ulanishda xatolik!");
+            }
+        }
+
+        // Ariza yuborish
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn');
+            btn.disabled = true;
+            btn.textContent = "Yuborilmoqda...";
+
+            const body = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                course: document.getElementById('courseSelect').value
+            };
+
+            const res = await fetch(`${API}/register`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+
+            if (res.ok) {
+                document.getElementById('regForm').classList.add('hidden');
+                document.getElementById('msg').classList.remove('hidden');
+            }
+        };
+
+        load();
+    </script>
+</body>
+</html>
